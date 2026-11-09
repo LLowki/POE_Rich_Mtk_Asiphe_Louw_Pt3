@@ -87,7 +87,8 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             Hero,
             Exit,
             Enemy,
-            Pickup
+            HealthPickup,
+            AttackBuffPickup
         }
 
         private Tile CreateTile(TileType tileType, Position position)   //Method to create tiles, by figuring out which tile type to make and creating a new tile class with the given position and tiletype
@@ -111,8 +112,11 @@ namespace POE_Rich_Mtk_Asiphe_Louw
                 case TileType.Enemy:
                     tile = new GruntTile(position);
                     break;
-                case TileType.Pickup:
+                case TileType.HealthPickup:
                     tile = new HealthPickupTile(position);
+                    break;
+                case TileType.AttackBuffPickup:
+                    tile = new AttackBuffPickupTile(position);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(tileType));
@@ -200,6 +204,21 @@ namespace POE_Rich_Mtk_Asiphe_Louw
                 i++;
             }
             hero.UpdateVision(currentLevel);
+        }
+
+        private PickupTile CreatePickupTile(Position position)
+        {
+            Random random = new Random();
+            int pickupRoll = random.Next(1, 4);
+
+            if (pickupRoll < 3)
+            {
+                return (PickupTile)CreateTile(TileType.HealthPickup, position);
+            }
+            else
+            {
+                return (PickupTile)CreateTile(TileType.AttackBuffPickup, position);
+            }
         }
     }
 }

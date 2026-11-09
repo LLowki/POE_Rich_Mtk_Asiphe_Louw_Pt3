@@ -6,6 +6,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
         private int maximumHitPoints;
         private int attackPower;
         private Tile[] vision;
+        private static int doubleDamageCount;
 
         protected CharacterTile(Position position, int hitPoints, int attackPower) : base(position)
         {
@@ -70,7 +71,23 @@ namespace POE_Rich_Mtk_Asiphe_Louw
 
         public void Attack(CharacterTile target)
         {
-            target.TakeDamage(attackPower);
+
+            if (doubleDamageCount > 0)
+            {
+                target.TakeDamage(attackPower*2);
+                doubleDamageCount = doubleDamageCount - 2;
+            }
+            else
+            {
+                target.TakeDamage(attackPower);
+            }
+        }
+
+        public static int SetDoubleDamage(int attackBuffCount)
+        {
+            doubleDamageCount = attackBuffCount + doubleDamageCount;
+
+            return doubleDamageCount;
         }
     }
 }
