@@ -74,7 +74,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             for (int pickupIndex = 0; pickupIndex < numberOfPickups; pickupIndex++)
             {
                 Position pickupPosition = GetRandomEmptyPosition();
-                pickups[pickupIndex] = (PickupTile)CreateTile(TileType.Pickup, pickupPosition);
+                pickups[pickupIndex] = CreatePickupTile(pickupPosition);
             }
 
             UpdateVision(this);
@@ -218,6 +218,25 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             else
             {
                 return (PickupTile)CreateTile(TileType.AttackBuffPickup, position);
+            }
+        }
+
+        public void UpdateExit()
+        {
+            int i = 0;
+
+            while (i < enemyNum)
+            {
+                if (enemies[i].IsDead == true)
+                {
+                    exit.IsLocked = false;
+                    i++;
+                }
+                else
+                {
+                    exit.IsLocked = true;
+                    i = enemyNum;
+                }
             }
         }
     }

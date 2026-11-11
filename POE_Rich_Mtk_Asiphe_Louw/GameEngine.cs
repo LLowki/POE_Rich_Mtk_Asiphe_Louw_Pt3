@@ -41,6 +41,11 @@ namespace POE_Rich_Mtk_Asiphe_Louw
 
             if (targetTile is ExitTile)
             {
+                if (currentLevel.Exit.IsLocked == true)
+                {
+                    return true;
+                }
+
                 if (currentLevelNumber == numberOfLevels)
                 {
                     gameState = GameState.Complete;
@@ -131,6 +136,8 @@ namespace POE_Rich_Mtk_Asiphe_Louw
                     gameState = GameState.GameOver;
                 }
             }
+
+            currentLevel.UpdateExit();
         }
 
         public string HeroStats
