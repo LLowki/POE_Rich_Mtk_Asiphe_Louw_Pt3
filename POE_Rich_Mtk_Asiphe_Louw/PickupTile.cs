@@ -1,5 +1,6 @@
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal abstract class PickupTile : Tile
     {
         protected PickupTile(Position position) : base(position)

@@ -3,13 +3,17 @@ using System.Text;
 
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class Level                        //Level Class to create and display the game levels
     {
+        [NonSerialized]
         private Tile[,] tiles;                  //2D tile class array for the level layout
+        private Tile[] savedTiles;              //Flat copy for binary XML serialization
         private int width;
         private int height;
         private HeroTile hero;
         private ExitTile exit;
+        [NonSerialized]
         private Random random;
         private EnemyTile[] enemies;
         private PickupTile[] pickups;
@@ -218,6 +222,73 @@ namespace POE_Rich_Mtk_Asiphe_Louw
                 i++;
             }
             hero.UpdateVision(currentLevel);
+        }
+
+        internal void PrepareForSave()
+        {
+            savedTiles = new Tile[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    savedTiles[y * width + x] = tiles[x, y];
+                }
+            }
+        }
+
+        internal void ClearSaveBuffer()
+        {
+            savedTiles = null;
+        }
+
+        internal void RestoreAfterLoad()
+        {
+            if (width < 3 || width > 100 || height < 3 || height > 100 ||
+                savedTiles == null || savedTiles.Length != width * height ||
+                hero == null || exit == null || enemies == null || pickups == null)
+            {
+                throw new System.Runtime.Serialization.SerializationException("Invalid level data.");
+            }
+
+            tiles = new Tile[width, height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    Tile tile = savedTiles[y * width + x];
+                    if (tile == null || tile.Position == null || tile.X != x || tile.Y != y ||
+                        ((x == 0 || y == 0 || x == width - 1 || y == height - 1) && !(tile is WallTile)))
+                    {
+                        throw new System.Runtime.Serialization.SerializationException("Invalid tile data.");
+                    }
+                    tiles[x, y] = tile;
+                }
+            }
+            if (!IsPlacedCharacter(hero) || exit.Position == null || exit.X < 1 ||
+                exit.Y < 1 || exit.X >= width - 1 || exit.Y >= height - 1 ||
+                !ReferenceEquals(tiles[exit.X, exit.Y], exit))
+            {
+                throw new System.Runtime.Serialization.SerializationException("Invalid hero or exit data.");
+            }
+            foreach (EnemyTile enemy in enemies)
+            {
+                if (!IsPlacedCharacter(enemy) || !enemy.BelongsTo(this))
+                {
+                    throw new System.Runtime.Serialization.SerializationException("Invalid enemy data.");
+                }
+            }
+            enemyNum = enemies.Length;
+            random = new Random();
+            savedTiles = null;
+            UpdateVision(this);
+        }
+
+        private bool IsPlacedCharacter(CharacterTile character)
+        {
+            return character != null && character.Position != null &&
+                   character.X > 0 && character.X < width - 1 &&
+                   character.Y > 0 && character.Y < height - 1 &&
+                   ReferenceEquals(tiles[character.X, character.Y], character);
         }
 
         private PickupTile CreatePickupTile(Position position)

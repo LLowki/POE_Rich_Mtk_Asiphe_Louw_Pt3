@@ -1,12 +1,14 @@
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal abstract class CharacterTile : Tile
     {
         private int hitPoints;
         private int maximumHitPoints;
         private int attackPower;
+        [System.NonSerialized]
         private Tile[] vision;
-        private static int doubleDamageCount;
+        private int doubleDamageCount;
 
         protected CharacterTile(Position position, int hitPoints, int attackPower) : base(position)
         {
@@ -43,6 +45,10 @@ namespace POE_Rich_Mtk_Asiphe_Louw
 
         public void UpdateVision(Level level)
         {
+            if (vision == null)
+            {
+                vision = new Tile[4];
+            }
             vision[0] = level.Tiles[X, Y - 1];
             vision[1] = level.Tiles[X + 1, Y];
             vision[2] = level.Tiles[X, Y + 1];
@@ -75,7 +81,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             if (doubleDamageCount > 0)
             {
                 target.TakeDamage(attackPower*2);
-                doubleDamageCount = doubleDamageCount - 2;
+                doubleDamageCount--;
             }
             else
             {
@@ -83,7 +89,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             }
         }
 
-        public static int SetDoubleDamage(int attackBuffCount)
+        public int SetDoubleDamage(int attackBuffCount)
         {
             doubleDamageCount = attackBuffCount + doubleDamageCount;
 

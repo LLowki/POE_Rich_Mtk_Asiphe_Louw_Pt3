@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class WarlockTile : EnemyTile
     {
         public WarlockTile(Position position, Level level) : base(position, 10, 5, level)

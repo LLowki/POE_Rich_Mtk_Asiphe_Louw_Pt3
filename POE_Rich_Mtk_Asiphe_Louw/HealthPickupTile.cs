@@ -1,5 +1,6 @@
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class HealthPickupTile : PickupTile
     {
         private const int HEAL_AMOUNT = 10;

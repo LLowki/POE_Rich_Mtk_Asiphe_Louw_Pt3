@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal abstract class EnemyTile : CharacterTile
     {
         protected Level level;
@@ -16,6 +17,11 @@ namespace POE_Rich_Mtk_Asiphe_Louw
         }
 
         public abstract bool GetMove(out Tile outMove);
+
+        internal bool BelongsTo(Level currentLevel)
+        {
+            return ReferenceEquals(level, currentLevel);
+        }
 
         public abstract CharacterTile[] GetTargets();
     }

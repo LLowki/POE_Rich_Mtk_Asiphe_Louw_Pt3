@@ -1,5 +1,6 @@
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class HeroTile : CharacterTile
     {
         public HeroTile(Position position) : base(position, 40, 5)

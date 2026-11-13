@@ -1,5 +1,6 @@
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class EmptyTile : Tile
     {
         public EmptyTile(Position position) : base(position)    //Empty tile class extened from parent tile class

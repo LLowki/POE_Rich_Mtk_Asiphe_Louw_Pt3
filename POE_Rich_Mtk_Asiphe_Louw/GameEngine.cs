@@ -1,4 +1,8 @@
 using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Xml;
 
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
@@ -146,6 +150,121 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             {
                 return currentLevel.Hero.HitPoints + "/" + currentLevel.Hero.MaximumHitPoints;
             }
+        }
+
+        private static string SavePath
+        {
+            get
+            {
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                    "POE_Rich_Mtk_Asiphe_Louw", "savegame.bin");
+            }
+        }
+
+        private static DataContractSerializer CreateSaveSerializer()
+        {
+            // Fixed known types, binary XML and reference preservation support the
+            // Level/Enemy cycles without using the unsafe BinaryFormatter.
+            return new DataContractSerializer(typeof(GameSaveData), new DataContractSerializerSettings
+            {
+                PreserveObjectReferences = true,
+                MaxItemsInObjectGraph = 100000,
+                KnownTypes = new Type[] { typeof(EmptyTile), typeof(WallTile), typeof(HeroTile),
+                    typeof(ExitTile), typeof(GruntTile), typeof(WarlockTile), typeof(TyrantTile),
+                    typeof(HealthPickupTile), typeof(AttackBuffPickupTile) }
+            });
+        }
+
+        public void SaveGame()
+        {
+            SaveGame(SavePath);
+        }
+
+        public void SaveGame(string path)
+        {
+            GameSaveData data = new GameSaveData(numberOfLevels, currentLevelNumber,
+                                                currentLevel, gameState, movesMade);
+            byte[] bytes;
+            currentLevel.PrepareForSave();
+            try
+            {
+                using (MemoryStream buffer = new MemoryStream())
+                {
+                    using (XmlDictionaryWriter writer = XmlDictionaryWriter.CreateBinaryWriter(
+                        buffer, null, null, false))
+                    {
+                        CreateSaveSerializer().WriteObject(writer, data);
+                        writer.Flush();
+                    }
+                    bytes = buffer.ToArray();
+                }
+            }
+            finally
+            {
+                currentLevel.ClearSaveBuffer();
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+            string temporaryPath = fullPath + ".tmp";
+            try
+            {
+                File.WriteAllBytes(temporaryPath, bytes);
+                if (File.Exists(fullPath))
+                {
+                    File.Replace(temporaryPath, fullPath, null);
+                }
+                else
+                {
+                    File.Move(temporaryPath, fullPath);
+                }
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+            }
+        }
+
+        public void LoadGame()
+        {
+            LoadGame(SavePath);
+        }
+
+        public void LoadGame(string path)
+        {
+            GameSaveData data;
+            using (FileStream stream = File.OpenRead(path))
+            {
+                if (stream.Length == 0 || stream.Length > 10 * 1024 * 1024)
+                {
+                    throw new SerializationException("Invalid save file size.");
+                }
+                XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas
+                {
+                    MaxDepth = 128,
+                    MaxArrayLength = 100000,
+                    MaxStringContentLength = 65536
+                };
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateBinaryReader(stream, quotas))
+                {
+                    data = (GameSaveData)CreateSaveSerializer().ReadObject(reader);
+                }
+            }
+            if (data == null || data.CurrentLevel == null || data.NumberOfLevels < 1 ||
+                data.CurrentLevelNumber < 1 || data.CurrentLevelNumber > data.NumberOfLevels ||
+                data.MovesMade < 0 || !Enum.IsDefined(typeof(GameState), data.State))
+            {
+                throw new SerializationException("Invalid saved game state.");
+            }
+            // Rebuild and validate first: a failed load must leave the live game intact.
+            data.CurrentLevel.RestoreAfterLoad();
+            numberOfLevels = data.NumberOfLevels;
+            currentLevelNumber = data.CurrentLevelNumber;
+            currentLevel = data.CurrentLevel;
+            enemyNum = currentLevel.Enemies.Length;
+            movesMade = data.MovesMade;
+            gameState = data.State;
+            random = new Random();
         }
 
         public override string ToString()

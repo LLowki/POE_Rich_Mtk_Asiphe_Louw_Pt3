@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class AttackBuffPickupTile : PickupTile
     {
         private int attackBuffCount = 3;
@@ -15,7 +16,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
 
         public override void ApplyEffect(CharacterTile target)
         {
-            CharacterTile.SetDoubleDamage(attackBuffCount);
+            target.SetDoubleDamage(attackBuffCount);
         }
 
         public override char Display

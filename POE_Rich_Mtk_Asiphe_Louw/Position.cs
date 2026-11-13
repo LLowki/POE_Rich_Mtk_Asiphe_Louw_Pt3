@@ -1,5 +1,6 @@
 namespace POE_Rich_Mtk_Asiphe_Louw
 {
+    [System.Serializable]
     internal class Position
     {
         private int x;                  //X and  Y integer variables for tile positions
