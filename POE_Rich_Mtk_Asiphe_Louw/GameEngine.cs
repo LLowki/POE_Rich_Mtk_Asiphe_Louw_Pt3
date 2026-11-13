@@ -89,7 +89,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
             HeroTile hero = currentLevel.Hero;
             Tile targetTile = hero.Vision[(int)direction];
 
-            if (targetTile is CharacterTile target)
+            if (targetTile is CharacterTile target && !target.IsDead)
             {
                 hero.Attack(target);
                 return true;
@@ -101,6 +101,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
         private void NextLevel()
         {
             currentLevelNumber++;
+            enemyNum = currentLevelNumber;
             HeroTile hero = currentLevel.Hero;
 
             int width = random.Next(MIN_SIZE, MAX_SIZE + 1);
