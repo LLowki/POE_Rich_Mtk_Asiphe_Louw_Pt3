@@ -10,7 +10,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
     {
         private static readonly Random random = new Random();
 
-        public GruntTile(Position position) : base(position, 10, 1)
+        public GruntTile(Position position, Level level) : base(position, 10, 1, level)
         {
         }
 

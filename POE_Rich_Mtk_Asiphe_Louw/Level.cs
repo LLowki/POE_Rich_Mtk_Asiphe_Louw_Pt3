@@ -110,7 +110,7 @@ namespace POE_Rich_Mtk_Asiphe_Louw
                     tile = new ExitTile(position);
                     break;
                 case TileType.Enemy:
-                    tile = new GruntTile(position);
+                    tile = CreateEnemyTile(position);
                     break;
                 case TileType.HealthPickup:
                     tile = new HealthPickupTile(position);
@@ -124,6 +124,20 @@ namespace POE_Rich_Mtk_Asiphe_Louw
 
             tiles[position.X, position.Y] = tile;
             return tile;                //Returns created tile
+        }
+
+        private EnemyTile CreateEnemyTile(Position position)
+        {
+            int enemyRoll = random.Next(100);
+            if (enemyRoll < 50)
+            {
+                return new GruntTile(position, this);
+            }
+            if (enemyRoll < 80)
+            {
+                return new WarlockTile(position, this);
+            }
+            return new TyrantTile(position, this);
         }
 
         private void InitialiseTiles()  //Method to initialize map with empty tiles
